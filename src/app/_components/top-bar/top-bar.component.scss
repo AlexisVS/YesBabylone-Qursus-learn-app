@@ -1,19 +1,122 @@
 :host {
     .top-bar {
         display: flex;
-        align-items: baseline;
+        gap: 16px;
+        align-items: flex-start;
         justify-content: space-between;
 
         width: 100%;
-        padding: 0 24px;
+        padding: 12px;
 
-        .actions {
+        border-bottom: 1px solid var(--color-border);
+
+        .brand {
+            width: 150px;
+        }
+
+        .informations {
             display: flex;
-            gap: 8px;
-            align-items: center;
+            flex-direction: row;
+            align-items: flex-start;
             justify-content: space-between;
 
-            margin: 0 8px;
+            width: 100%;
+            margin: 0 32px;
+
+            .course {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+                justify-content: flex-start;
+
+                .name {
+
+                }
+
+                .breadcrumb {
+                    position: relative;
+
+                    display: flex;
+                    gap: 32px;
+                    align-items: center;
+                    justify-content: flex-start;
+
+                    .part + .part::before {
+                        content: '>';
+
+                        position: absolute;
+                        top: 50%;
+                        left: 0;
+                        transform: translateY(-50%) translateX(-175%);
+
+                        display: block;
+
+                        font-size: 150%;
+                    }
+
+                    .part {
+                        position: relative;
+
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        justify-content: flex-start;
+
+
+                        .label {
+
+                        }
+
+                        .progress {
+
+                        }
+                    }
+                }
+            }
+
+            .progression {
+                display: flex;
+                flex-direction: row;
+                gap: 32px;
+                align-items: center;
+                justify-content: flex-start;
+
+                .text {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    align-items: flex-start;
+                    justify-content: flex-start;
+
+                    .title {
+
+                    }
+
+                    .details {
+
+                    }
+
+                }
+
+                .chart {
+                    width: 75px;
+                    height: 75px;
+
+                    img {
+                        border-radius: 999px;
+                    }
+                }
+            }
+        }
+
+        .profile {
+            width: 50px;
+
+            img {
+                width: 50px;
+                border-radius: 9999px;
+            }
         }
     }
 }

@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ModuleEditionPanelComponent } from './module-edition-panel.component';
+import { LargeComponent } from './large.component';
 
-describe('CourseEditionPanelComponent', () => {
-    let component: ModuleEditionPanelComponent;
-    let fixture: ComponentFixture<ModuleEditionPanelComponent>;
+describe('LargeComponent', () => {
+    let component: LargeComponent;
+    let fixture: ComponentFixture<LargeComponent>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [ModuleEditionPanelComponent],
+            declarations: [LargeComponent],
         }).compileComponents();
     });
 
     beforeEach(() => {
-        fixture = TestBed.createComponent(ModuleEditionPanelComponent);
+        fixture = TestBed.createComponent(LargeComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
