@@ -8,14 +8,4 @@ import { ContextService } from 'sb-shared-lib';
     templateUrl: 'app.component.html',
     styleUrls: ['app.component.scss'],
 })
-export class AppComponent implements OnInit {
-    public ready: boolean = false;
-
-    constructor(private context: ContextService) {}
-
-    public ngOnInit() {
-        this.context.ready.subscribe((ready: boolean) => {
-            this.ready = ready;
-        });
-    }
-}
+export class AppComponent {}

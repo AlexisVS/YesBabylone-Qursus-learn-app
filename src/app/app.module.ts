@@ -10,10 +10,28 @@ import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { Platform } from '@angular/cdk/platform';
 import { TopBarComponent } from './_components/top-bar/top-bar.component';
 import { LargeComponent } from './in/large/large.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatListModule } from '@angular/material/list';
 
 @NgModule({
     declarations: [AppRootComponent, AppComponent, TopBarComponent, LargeComponent],
-    imports: [AppRoutingModule, BrowserModule, BrowserAnimationsModule, SharedLibModule],
+    imports: [
+        AppRoutingModule,
+        BrowserModule,
+        BrowserAnimationsModule,
+        SharedLibModule,
+        MatTabsModule,
+        MatIconModule,
+        MatInputModule,
+        MatButtonModule,
+        MatExpansionModule,
+        MatListModule,
+        SharedLibModule,
+    ],
     providers: [
         // add HTTP interceptor to inject AUTH header to any outgoing request
         // { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorService, multi: true },

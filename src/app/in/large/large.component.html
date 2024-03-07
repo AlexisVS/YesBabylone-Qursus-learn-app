@@ -1,1 +1,66 @@
 <app-top-bar></app-top-bar>
+<div class="body">
+
+    <div class="side-bar">
+        <div class="search">
+            <mat-icon class="search-icon" matPrefix>search</mat-icon>
+            <input type="search">
+        </div>
+
+        <button #sideBarMenuButton mat-icon-button (click)="onSideBarButtonClick()">
+            <mat-icon>{{ menuIcon }}</mat-icon>
+        </button>
+    </div>
+
+    <div class="content">
+        <mat-tab-group>
+            <mat-tab label="Content">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet aspernatur delectus, doloremque ea error
+                id magni molestiae nisi nobis placeat quasi quod recusandae reiciendis repellendus repudiandae sapiente
+                tempore veniam voluptatibus?
+            </mat-tab>
+            <mat-tab label="Presentation"> Content 2</mat-tab>
+            <mat-tab label="Questions and answers"> Content 3</mat-tab>
+            <mat-tab label="Reviews"> Content 4</mat-tab>
+        </mat-tab-group>
+
+        <div #drawer class="drawer" [class]="drawerState">
+            <mat-accordion multi>
+                <mat-expansion-panel class="module-panel"
+                                     (opened)="selectedModuleIndex = index"
+                                     [expanded]="selectedModuleIndex === index"
+                                     [class.selected]="selectedModuleIndex === index"
+                                     *ngFor="let module of courseItemLists; index as index">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>{{ module.title }}</mat-panel-title>
+                        <mat-panel-description>0 / 4 | 20min</mat-panel-description>
+                    </mat-expansion-panel-header>
+
+                    <mat-selection-list [multiple]="false">
+                        <mat-list-option class="item" *ngFor="let lesson of module.lessons" [value]="lesson">
+                            <div class="content">
+                                <div class="row">
+                                    <span class="title">{{ lesson.title }}</span>
+                                    <button class="star-button " title="Add to favorite" mat-icon-button
+                                            (click)="onStarredLessonClick($event, module, lesson)">
+                                        <mat-icon [style.opacity]="lesson.starred ? 1 : undefined" svgIcon>
+                                            {{ lesson.starred ? 'star' : 'star_outline' }}
+                                        </mat-icon>
+                                    </button>
+                                </div>
+                                <div class="row">
+                                    <div class="assets">
+                                        <mat-icon>movie</mat-icon>
+                                        <mat-icon>description</mat-icon>
+                                        <mat-icon>attach_file</mat-icon>
+                                    </div>
+                                    <span class="duration">5min</span>
+                                </div>
+                            </div>
+                        </mat-list-option>
+                    </mat-selection-list>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+    </div>
+</div>

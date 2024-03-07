@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 :host {
     .top-bar {
         display: flex;
@@ -30,9 +31,8 @@
                 align-items: flex-start;
                 justify-content: flex-start;
 
-                .name {
-
-                }
+                // .name {
+                // }
 
                 .breadcrumb {
                     position: relative;
@@ -64,13 +64,11 @@
                         justify-content: flex-start;
 
 
-                        .label {
+                        // .label {
+                        // }
 
-                        }
-
-                        .progress {
-
-                        }
+                        // .progress {
+                        // }
                     }
                 }
             }
@@ -89,13 +87,11 @@
                     align-items: flex-start;
                     justify-content: flex-start;
 
-                    .title {
+                    // .title {
+                    // }
 
-                    }
-
-                    .details {
-
-                    }
+                    // .details {
+                    // }
 
                 }
 
