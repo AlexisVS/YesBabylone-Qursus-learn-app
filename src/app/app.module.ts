@@ -16,6 +16,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatListModule } from '@angular/material/list';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
     declarations: [AppRootComponent, AppComponent, TopBarComponent, LargeComponent],
@@ -30,7 +31,7 @@ import { MatListModule } from '@angular/material/list';
         MatButtonModule,
         MatExpansionModule,
         MatListModule,
-        SharedLibModule,
+        MatProgressSpinnerModule,
     ],
     providers: [
         // add HTTP interceptor to inject AUTH header to any outgoing request

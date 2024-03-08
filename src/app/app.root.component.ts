@@ -1,14 +1,6 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { Router } from '@angular/router';
-
-import {
-    ContextService,
-    ApiService,
-    AuthService,
-    EnvService,
-    // @ts-ignore
-} from 'sb-shared-lib';
 
 // TODO: <AlexisVS> Added for development
 import menu from '../assets/menu.json';
