@@ -4,7 +4,7 @@ html {
     font-size: $base-font-size;
 }
 
-$type-scale: 1.125;
+$type-scale: 1.067;
 
 // The desired unit supports "rem", "em", and "%".
 $desired-unit: '%';
@@ -34,12 +34,12 @@ $desired-unit: '%';
     @return unquote($font-size + $desired-unit)
 }
 
-@for $i from -3 through 4 {
+@for $i from -3 through 5 {
     .font-size-#{$i} {
         font-size: typeScaleSize($i);
         text-rendering: geometricprecision;
 
-        @if $i == 4 {
+        @if $i >= 4 {
             font-weight: 700;
             line-height: 1.2;
         } @else if $i == 3 {

@@ -1,10 +1,9 @@
 <app-top-bar></app-top-bar>
 <div class="body">
-
     <div class="side-bar">
         <div class="search">
             <mat-icon class="search-icon" matPrefix>search</mat-icon>
-            <input type="search">
+            <input type="search" />
         </div>
 
         <button #sideBarMenuButton mat-icon-button (click)="onSideBarButtonClick()">
@@ -15,8 +14,10 @@
     <div class="content">
         <mat-tab-group>
             <mat-tab label="Content">
-                <p *ngFor="let i of [4,3,2,1,0,-1,-2, -3]" [class]="'font-size-' + i">Lorem ipsum dolor sit amet,
-                    consectetur adipisicing elit. Asperiores aspernatur, assumenda culpa cumque delectus doloribus.</p>
+                <p *ngFor="let i of [4, 3, 2, 1, 0, -1, -2, -3]" [class]="'font-size-' + i">
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores aspernatur, assumenda culpa
+                    cumque delectus doloribus.
+                </p>
             </mat-tab>
             <mat-tab label="Presentation"> Content 2</mat-tab>
             <mat-tab label="Questions and answers"> Content 3</mat-tab>
@@ -25,14 +26,17 @@
 
         <div #drawer class="drawer" [class]="drawerState">
             <mat-accordion multi>
-                <mat-expansion-panel class="module-panel"
-                                     (opened)="selectedModuleIndex = index"
-                                     [expanded]="selectedModuleIndex === index"
-                                     [class.selected]="selectedModuleIndex === index"
-                                     *ngFor="let module of courseItemLists; index as index">
+                <mat-expansion-panel
+                    class="module-panel"
+                    (opened)="selectedModuleIndex = index"
+                    [expanded]="selectedModuleIndex === index"
+                    [class.selected]="selectedModuleIndex === index"
+                    *ngFor="let module of courseItemLists; index as index">
                     <mat-expansion-panel-header>
                         <mat-panel-title class="font-size-1">{{ module.title }}</mat-panel-title>
-                        <mat-panel-description class="font-size--2">0 / {{ module.lessons.length }} | 20min</mat-panel-description>
+                        <mat-panel-description class="font-size--2"
+                            >0 / {{ module.lessons.length }} | 20min
+                        </mat-panel-description>
                     </mat-expansion-panel-header>
 
                     <mat-selection-list [multiple]="false">
@@ -40,8 +44,11 @@
                             <div class="content">
                                 <div class="row">
                                     <span class="font-size--1 title">{{ lesson.title }}</span>
-                                    <button class="star-button " title="Add to favorite" mat-icon-button
-                                            (click)="onStarredLessonClick($event, module, lesson)">
+                                    <button
+                                        class="star-button"
+                                        title="Add to favorite"
+                                        mat-icon-button
+                                        (click)="onStarredLessonClick($event, module, lesson)">
                                         <mat-icon [style.opacity]="lesson.starred ? 1 : undefined" svgIcon>
                                             {{ lesson.starred ? 'star' : 'star_outline' }}
                                         </mat-icon>
@@ -51,7 +58,7 @@
                                     <div class="assets">
                                         <mat-icon>movie</mat-icon>
                                         <mat-icon color="primary">description</mat-icon>
-                                        <mat-icon style="color:#7e7e7e;">attach_file</mat-icon>
+                                        <mat-icon style="color: #7e7e7e">attach_file</mat-icon>
                                     </div>
                                     <span class="font-size--2 duration">5min</span>
                                 </div>

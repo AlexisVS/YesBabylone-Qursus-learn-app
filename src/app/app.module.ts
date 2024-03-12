@@ -17,9 +17,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SmallComponent } from './in/small/small.component';
 
 @NgModule({
-    declarations: [AppRootComponent, AppComponent, TopBarComponent, LargeComponent],
+    declarations: [AppRootComponent, AppComponent, TopBarComponent, LargeComponent, SmallComponent],
     imports: [
         AppRoutingModule,
         BrowserModule,
