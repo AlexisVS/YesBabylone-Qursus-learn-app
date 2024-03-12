@@ -1,19 +1,19 @@
 import * as Equal from './equal';
 
-export interface Course {
+export type Course = {
     id: number;
     name: string;
     title: string;
     subtitle: string;
     description: string;
     creator?: number;
-    modules?: String[];
+    modules?: Module[];
     modified?: string;
     langs_ids?: number[];
     state?: Equal.ModelState;
-}
+};
 
-export interface Module {
+export type Module = {
     id: number;
     identifier: number;
     title: string;
@@ -29,9 +29,9 @@ export interface Module {
     chapter_count?: number;
     course_id?: number | Course;
     link?: string;
-}
+};
 
-export interface Chapter {
+export type Chapter = {
     id: number;
     identifier: number;
     modified: string;
@@ -41,19 +41,19 @@ export interface Chapter {
     state: Equal.ModelState;
     creator?: number;
     order?: number;
-    pages?: String[];
-}
+    pages?: String[] | Page[];
+};
 
-export interface Page {
+export type Page = {
     id: number;
     identifier: number;
     modified: string;
     next_active: string;
     order: number;
     leaves: Leaf[];
-}
+};
 
-export interface Leaf {
+export type Leaf = {
     id: number;
     identifier: number;
     modified: string;
@@ -65,9 +65,9 @@ export interface Leaf {
     state: Equal.ModelState;
     visible: string;
     groups: Group[];
-}
+};
 
-export interface Group {
+export type Group = {
     id: number;
     identifier: number;
     modified: string;
@@ -78,9 +78,9 @@ export interface Group {
     fixed: boolean;
     row_span: number;
     widgets: Widget[];
-}
+};
 
-export interface Widget {
+export type Widget = {
     id: number;
     identifier: number;
     modified: string;
@@ -96,7 +96,7 @@ export interface Widget {
     align: string;
     on_click: string;
     state: Equal.ModelState;
-}
+};
 
 export type WidgetType =
     | 'text'

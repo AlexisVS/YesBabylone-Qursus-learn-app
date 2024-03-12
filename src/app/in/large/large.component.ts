@@ -1,5 +1,9 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatButton } from '@angular/material/button';
+import { Chapter, Course, Group, Leaf, Module, Page, Widget } from '../../_types/qursus';
+// @ts-ignore
+import { ApiService } from 'sb-shared-lib';
+import { ActivatedRoute } from '@angular/router';
 
 type DrawerState = 'inactive' | 'active' | 'pinned';
 
@@ -8,13 +12,15 @@ type DrawerState = 'inactive' | 'active' | 'pinned';
     templateUrl: './large.component.html',
     styleUrls: ['./large.component.scss'],
 })
-export class LargeComponent {
+export class LargeComponent implements OnInit {
     @ViewChild('drawer', { static: true }) drawer: ElementRef<HTMLDivElement>;
     @ViewChild('sideBarMenuButton') sideBarMenuButton: MatButton;
 
     public drawerState: DrawerState = 'inactive';
     public menuIcon: string = 'menu';
     public selectedModuleIndex: number = 0;
+
+    public course: Course;
 
     public courseItemLists: {
         title: string;
@@ -139,7 +145,11 @@ export class LargeComponent {
         },
     ];
 
-    constructor(private elementRef: ElementRef) {
+    constructor(
+        private elementRef: ElementRef,
+        private api: ApiService,
+        private route: ActivatedRoute
+    ) {
         window.addEventListener('click', (event: MouseEvent): void => {
             if (
                 this.drawerState === 'active' &&
@@ -178,10 +188,197 @@ export class LargeComponent {
         }
     }
 
-    public onClickOutsideDrawer(event: Event): void {
-        if (this.drawerState === 'active') {
-            this.drawerState = 'inactive';
-            this.menuIcon = 'menu';
+    public ngOnInit(): void {
+        this.loadCourse();
+    }
+
+    public async loadCourse(): Promise<void> {
+        try {
+            const courseId: string | null = this.route.snapshot.paramMap.get('courseId');
+            if (courseId) {
+                this.course = Array.from(
+                    await this.api.collect(
+                        'learn\\Course',
+                        [['id', '=', courseId]],
+                        ['name', 'title', 'subtitle', 'description']
+                    )
+                )[0] as Course;
+
+                this.loadModules();
+            }
+        } catch (error) {
+            console.error(error);
         }
+
+        console.log('THE COURSE', this.course);
+    }
+
+    public async loadModules(): Promise<void> {
+        try {
+            const courseId = this.route.snapshot.paramMap.get('courseId');
+            if (courseId) {
+                const modules = (await this.api.collect(
+                    'learn\\Module',
+                    [['course_id', '=', courseId]],
+                    [
+                        'id',
+                        'identifier',
+                        'order',
+                        'title',
+                        'link',
+                        'page_count',
+                        'chapter_count',
+                        'description',
+                        'duration',
+                        'course_id',
+                    ]
+                )) as Module[];
+
+                if (modules && modules.length > 0) {
+                    modules.sort((a, b) => a.order! - b.order!);
+                    this.course.modules = modules;
+                    this.loadChapter();
+                }
+
+                console.log(modules, this.course);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    private async loadChapter(): Promise<void> {
+        if (this.course.modules && this.course.modules?.length > 0) {
+            for (const module of this.course.modules) {
+                try {
+                    let lessons: Chapter[] = (await this.api.collect(
+                        'learn\\Chapter',
+                        [['module_id', '=', module.id]],
+                        ['id', 'identifier', 'order', 'title', 'description', 'module_id', 'page_count']
+                    )) as Chapter[];
+
+                    lessons.sort((a, b) => a.order! - b.order!);
+
+                    lessons = await this.loadPages(lessons);
+
+                    module.lessons = lessons;
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        }
+    }
+
+    private async loadPages(lessons: Chapter[]): Promise<Chapter[]> {
+        for (const lesson of lessons) {
+            try {
+                let pages: Page[] = await this.api.collect(
+                    'learn\\Page',
+                    [['chapter_id', '=', lesson.id]],
+                    ['id', 'identifier', 'order', 'next_active', 'next_active_rule', 'chapter_id']
+                );
+
+                pages.sort((a, b) => a.order! - b.order!);
+
+                pages = await this.loadLeaves(pages);
+
+                lesson.pages = pages;
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return lessons;
+    }
+
+    public async loadLeaves(pages: Page[]): Promise<Page[]> {
+        for (const page of pages) {
+            try {
+                let leaves: Leaf[] = await this.api.collect(
+                    'learn\\Leaf',
+                    [['page_id', '=', page.id]],
+                    ['id', 'identifier', 'order', 'background_image', 'page_id']
+                );
+
+                // @ts-ignore
+                leaves.sort((a, b) => a.order! - b.order!);
+
+                leaves = await this.loadGroups(leaves);
+
+                page.leaves = leaves;
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return pages;
+    }
+
+    public async loadGroups(leaves: Leaf[]): Promise<Leaf[]> {
+        for (const leaf of leaves) {
+            try {
+                let groups: Group[] = await this.api.collect(
+                    'learn\\Group',
+                    [['leaf_id', '=', leaf.id]],
+                    [
+                        'id',
+                        'identifier',
+                        'order',
+                        'direction',
+                        'row_span',
+                        'visible',
+                        'visibility_rule',
+                        'fixed',
+                        'leaf_id',
+                    ]
+                );
+
+                // @ts-ignore
+                groups.sort((a, b) => a.order! - b.order!);
+
+                groups = await this.loadWidgets(groups);
+
+                leaf.groups = groups;
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return leaves;
+    }
+
+    private async loadWidgets(groups: Group[]): Promise<Group[]> {
+        for (const group of groups) {
+            try {
+                let widgets: Widget[] = await this.api.collect(
+                    'learn\\Widget',
+                    [['group_id', '=', group.id]],
+                    [
+                        'id',
+                        'identifier',
+                        'order',
+                        'content',
+                        'type',
+                        'section_id',
+                        'image_url',
+                        'video_url',
+                        'sound_url',
+                        'has_separator_left',
+                        'has_separator_right',
+                        'align',
+                        'on_click',
+                    ]
+                );
+
+                // @ts-ignore
+                widgets.sort((a, b) => a.order! - b.order!);
+
+                group.widgets = widgets;
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return groups;
     }
 }

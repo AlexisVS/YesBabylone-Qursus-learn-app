@@ -10,11 +10,11 @@ const routes: Route[] = [
         component: AppComponent,
     },
     {
-        path: 'large',
+        path: 'large/:courseId',
         component: LargeComponent,
     },
     {
-        path: 'small',
+        path: 'small/:courseId',
         component: SmallComponent,
     },
 ];
