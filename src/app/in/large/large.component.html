@@ -1,6 +1,6 @@
 <app-top-bar></app-top-bar>
 <div class="body">
-    <div class="side-bar">
+    <div class="side-bar" *ngIf="hasAccessToCourse">
         <div class="search">
             <mat-icon class="search-icon" matPrefix>search</mat-icon>
             <input type="search" />
@@ -12,7 +12,10 @@
     </div>
 
     <div class="content">
-        <mat-tab-group>
+        <div *ngIf="!hasAccessToCourse">
+            <h1>You don't have access to course</h1>
+        </div>
+        <mat-tab-group *ngIf="hasAccessToCourse">
             <mat-tab label="Content">
                 <p *ngFor="let i of [4, 3, 2, 1, 0, -1, -2, -3]" [class]="'font-size-' + i">
                     Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores aspernatur, assumenda culpa

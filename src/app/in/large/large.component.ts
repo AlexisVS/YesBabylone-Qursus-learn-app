@@ -4,8 +4,16 @@ import { Chapter, Course, Group, Leaf, Module, Page, Widget } from '../../_types
 // @ts-ignore
 import { ApiService } from 'sb-shared-lib';
 import { ActivatedRoute } from '@angular/router';
+import { User } from '../../_types/equal';
 
 type DrawerState = 'inactive' | 'active' | 'pinned';
+
+type UserStatement = {
+    user: User;
+    userAccess: any[];
+    userInfo: any;
+    userStatus: any;
+};
 
 @Component({
     selector: 'app-large',
@@ -16,11 +24,15 @@ export class LargeComponent implements OnInit {
     @ViewChild('drawer', { static: true }) drawer: ElementRef<HTMLDivElement>;
     @ViewChild('sideBarMenuButton') sideBarMenuButton: MatButton;
 
+    public userStatement: UserStatement;
+    public environnementInfo: Record<string, any>;
+
     public drawerState: DrawerState = 'inactive';
     public menuIcon: string = 'menu';
     public selectedModuleIndex: number = 0;
 
     public course: Course;
+    public hasAccessToCourse: boolean = false;
 
     public courseItemLists: {
         title: string;
@@ -188,13 +200,62 @@ export class LargeComponent implements OnInit {
         }
     }
 
-    public ngOnInit(): void {
-        this.loadCourse();
+    public async ngOnInit(): Promise<void> {
+        this.environnementInfo = await this.api.get('appinfo');
+
+        const courseId: string | null = this.route.snapshot.paramMap.get('courseId');
+
+        if (courseId) {
+            await this.loadUserStatement(courseId);
+
+            if (this.userStatement.userAccess && this.userStatement.userAccess.length > 0) {
+                this.hasAccessToCourse = true;
+
+                await this.loadCourse(courseId);
+            }
+        }
     }
 
-    public async loadCourse(): Promise<void> {
+    public async loadUserStatement(courseId: string): Promise<void> {
+        this.userStatement.userInfo = await this.api.get('userinfo');
+
+        this.userStatement.userAccess = await this.api.collect(
+            'learn\\UserStatus',
+            [
+                ['user_id', '=', this.userStatement.userInfo.id],
+                ['course_id', '=', courseId],
+            ],
+            ['course_id', 'module_id', 'user_id', 'chapter_index', 'page_index', 'page_count', 'is_complete']
+        );
+
+        this.userStatement.userStatus = await this.api.collect(
+            'learn\\UserStatus',
+            [['user_id', '=', this.userStatement.userInfo.id]],
+            ['code', 'code_alpha', 'course_id', 'master_user_id', 'user_id', 'is_complete']
+        );
+
+        this.userStatement.user = Array.from(
+            await this.api.collect(
+                'core\\User',
+                [['id', '=', this.userStatement.userInfo.id]],
+                [
+                    'name',
+                    'organisation_id',
+                    'validated',
+                    'lastname',
+                    'login',
+                    'language',
+                    'identity_id',
+                    'firstname',
+                    'status',
+                    'username',
+                ]
+            )
+        )[0] as User;
+    }
+
+    public async loadCourse(courseId: string): Promise<void> {
         try {
-            const courseId: string | null = this.route.snapshot.paramMap.get('courseId');
             if (courseId) {
                 this.course = Array.from(
                     await this.api.collect(
@@ -204,7 +265,7 @@ export class LargeComponent implements OnInit {
                     )
                 )[0] as Course;
 
-                this.loadModules();
+                await this.loadModules(courseId);
             }
         } catch (error) {
             console.error(error);
@@ -213,9 +274,8 @@ export class LargeComponent implements OnInit {
         console.log('THE COURSE', this.course);
     }
 
-    public async loadModules(): Promise<void> {
+    public async loadModules(courseId: string): Promise<void> {
         try {
-            const courseId = this.route.snapshot.paramMap.get('courseId');
             if (courseId) {
                 const modules = (await this.api.collect(
                     'learn\\Module',
@@ -237,7 +297,7 @@ export class LargeComponent implements OnInit {
                 if (modules && modules.length > 0) {
                     modules.sort((a, b) => a.order! - b.order!);
                     this.course.modules = modules;
-                    this.loadChapter();
+                    await this.loadChapters();
                 }
 
                 console.log(modules, this.course);
@@ -247,7 +307,7 @@ export class LargeComponent implements OnInit {
         }
     }
 
-    private async loadChapter(): Promise<void> {
+    private async loadChapters(): Promise<void> {
         if (this.course.modules && this.course.modules?.length > 0) {
             for (const module of this.course.modules) {
                 try {
