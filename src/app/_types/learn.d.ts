@@ -24,7 +24,7 @@ export type Module = {
     state: Equal.ModelState;
     lessons?: Chapter[];
     creator?: number;
-    chapters?: String[];
+    chapters?: Chapter[];
     order?: number;
     chapter_count?: number;
     course_id?: number | Course;
@@ -36,6 +36,7 @@ export type Chapter = {
     identifier: number;
     modified: string;
     title: string;
+    duration: number;
     description: string;
     module_id?: number;
     state: Equal.ModelState;

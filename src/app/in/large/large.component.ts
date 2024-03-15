@@ -1,6 +1,6 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { Chapter, Course, Group, Leaf, Module, Page, Widget } from '../../_types/qursus';
+import { Course } from '../../_types/learn';
 // @ts-ignore
 import { ApiService } from 'sb-shared-lib';
 import { ActivatedRoute } from '@angular/router';
@@ -8,11 +8,11 @@ import { User } from '../../_types/equal';
 
 type DrawerState = 'inactive' | 'active' | 'pinned';
 
-type UserStatement = {
+export type UserStatement = {
     user: User;
-    userAccess: any[];
+    userAccess: any;
     userInfo: any;
-    userStatus: any;
+    userStatus: any[];
 };
 
 @Component({
@@ -20,147 +20,28 @@ type UserStatement = {
     templateUrl: './large.component.html',
     styleUrls: ['./large.component.scss'],
 })
-export class LargeComponent implements OnInit {
+export class LargeComponent implements AfterViewInit {
     @ViewChild('drawer', { static: true }) drawer: ElementRef<HTMLDivElement>;
     @ViewChild('sideBarMenuButton') sideBarMenuButton: MatButton;
 
-    public userStatement: UserStatement;
+    public userStatement: UserStatement = {} as UserStatement;
+
     public environnementInfo: Record<string, any>;
+    public appInfo: Record<string, any>;
 
     public drawerState: DrawerState = 'inactive';
     public menuIcon: string = 'menu';
+    public currentModuleProgressionIndex: number = 0;
     public selectedModuleIndex: number = 0;
 
     public course: Course;
     public hasAccessToCourse: boolean = false;
-
-    public courseItemLists: {
-        title: string;
-        lessons: {
-            starred?: boolean;
-            title: string;
-        }[];
-    }[] = [
-        {
-            title: 'Module 1',
-            lessons: [
-                { title: 'Lesson 1 of Module 1', starred: true },
-                { title: 'Lesson 2 of Module 1' },
-                { title: 'Lesson 3 of Module 1', starred: true },
-                { title: 'Lesson 4 of Module 1' },
-                { title: 'Lesson 5 of Module 1' },
-                { title: 'Lesson 6 of Module 1' },
-                { title: 'Lesson 7 of Module 1' },
-                { title: 'Lesson 8 of Module 1' },
-                { title: 'Lesson 9 of Module 1' },
-                { title: 'Lesson 10 of Module 1' },
-                { title: 'Lesson 11 of Module 1' },
-                { title: 'Lesson 12 of Module 1' },
-                { title: 'Lesson 13 of Module 1' },
-                { title: 'Lesson 14 of Module 1' },
-                { title: 'Lesson 15 of Module 1' },
-                { title: 'Lesson 16 of Module 1' },
-                { title: 'Lesson 17 of Module 1' },
-                { title: 'Lesson 18 of Module 1' },
-                { title: 'Lesson 19 of Module 1' },
-                { title: 'Lesson 20 of Module 1' },
-                { title: 'Lesson 21 of Module 1' },
-            ],
-        },
-        {
-            title: 'Module 2',
-            lessons: [
-                { title: 'Lesson 1 of Module 2' },
-                { title: 'Lesson 2 of Module 2', starred: true },
-                { title: 'Lesson 3 of Module 2' },
-            ],
-        },
-        {
-            title: 'Module 3',
-            lessons: [
-                { title: 'Lesson 1 of Module 3' },
-                { title: 'Lesson 2 of Module 3', starred: true },
-                { title: 'Lesson 3 of Module 3', starred: true },
-            ],
-        },
-        {
-            title: 'Module 4',
-            lessons: [
-                { title: 'Lesson 1 of Module 4', starred: true },
-                { title: 'Lesson 2 of Module 4' },
-                { title: 'Lesson 3 of Module 4' },
-            ],
-        },
-        {
-            title: 'Module 5',
-            lessons: [
-                { title: 'Lesson 1 of Module 5' },
-                { title: 'Lesson 2 of Module 5', starred: true },
-                { title: 'Lesson 3 of Module 5' },
-            ],
-        },
-        {
-            title: 'Module 6',
-            lessons: [
-                { title: 'Lesson 1 of Module 6' },
-                { title: 'Lesson 2 of Module 6', starred: true },
-                { title: 'Lesson 3 of Module 6' },
-            ],
-        },
-        {
-            title: 'Module 7',
-            lessons: [
-                { title: 'Lesson 1 of Module 7' },
-                { title: 'Lesson 2 of Module 7', starred: true },
-                { title: 'Lesson 3 of Module 7' },
-            ],
-        },
-        {
-            title: 'Module 8',
-            lessons: [
-                { title: 'Lesson 1 of Module 8' },
-                { title: 'Lesson 2 of Module 8', starred: true },
-                { title: 'Lesson 3 of Module 8' },
-            ],
-        },
-        {
-            title: 'Module 9',
-            lessons: [
-                { title: 'Lesson 1 of Module 9' },
-                { title: 'Lesson 2 of Module 9', starred: true },
-                { title: 'Lesson 3 of Module 9' },
-            ],
-        },
-        {
-            title: 'Module 10',
-            lessons: [
-                { title: 'Lesson 1 of Module 10' },
-                { title: 'Lesson 2 of Module 10', starred: true },
-                { title: 'Lesson 3 of Module 10' },
-            ],
-        },
-        {
-            title: 'Module 11',
-            lessons: [
-                { title: 'Lesson 1 of Module 11' },
-                { title: 'Lesson 2 of Module 11', starred: true },
-                { title: 'Lesson 3 of Module 11' },
-            ],
-        },
-        {
-            title: 'Module 12',
-            lessons: [
-                { title: 'Lesson 1 of Module 12' },
-                { title: 'Lesson 2 of Module 12', starred: true },
-                { title: 'Lesson 3 of Module 12' },
-            ],
-        },
-    ];
+    public isLoading: boolean = true;
 
     constructor(
-        private elementRef: ElementRef,
         private api: ApiService,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        private elementRef: ElementRef
     ) {
         window.addEventListener('click', (event: MouseEvent): void => {
             if (
@@ -200,245 +81,139 @@ export class LargeComponent implements OnInit {
         }
     }
 
-    public async ngOnInit(): Promise<void> {
+    // public ngOnInit(): void {
+    // }
+
+    public ngAfterViewInit(): void {
+        this.load();
+    }
+
+    public async load(): Promise<void> {
         this.environnementInfo = await this.api.get('appinfo');
 
-        const courseId: string | null = this.route.snapshot.paramMap.get('courseId');
+        this.appInfo = await this.api.get('assets/env/config.json');
 
-        if (courseId) {
+        const courseTitleSlug: string | null = this.route.snapshot.paramMap.get('slug');
+        const courseId: string = (
+            await this.api.collect('learn\\Course', [['title', '=', courseTitleSlug]], ['id'])
+        )[0].id.toString();
+
+        if (courseId && courseTitleSlug) {
+            const courseTitleHyphenated: string = courseTitleSlug.replace(/ /g, '-');
+
+            document.title = `Learn - ${courseTitleSlug}`;
+            window.history.replaceState({}, '', `/${courseTitleHyphenated}`);
+
             await this.loadUserStatement(courseId);
+            await this.loadCourse(courseId);
 
-            if (this.userStatement.userAccess && this.userStatement.userAccess.length > 0) {
+            if (this.course) {
+                this.currentModuleProgressionIndex = this.getCurrentModuleIndex();
                 this.hasAccessToCourse = true;
-
-                await this.loadCourse(courseId);
             }
         }
+        this.isLoading = false;
     }
 
     public async loadUserStatement(courseId: string): Promise<void> {
-        this.userStatement.userInfo = await this.api.get('userinfo');
+        try {
+            this.userStatement.userInfo = await this.api.get('userinfo');
 
-        this.userStatement.userAccess = await this.api.collect(
-            'learn\\UserStatus',
-            [
-                ['user_id', '=', this.userStatement.userInfo.id],
-                ['course_id', '=', courseId],
-            ],
-            ['course_id', 'module_id', 'user_id', 'chapter_index', 'page_index', 'page_count', 'is_complete']
-        );
-
-        this.userStatement.userStatus = await this.api.collect(
-            'learn\\UserStatus',
-            [['user_id', '=', this.userStatement.userInfo.id]],
-            ['code', 'code_alpha', 'course_id', 'master_user_id', 'user_id', 'is_complete']
-        );
-
-        this.userStatement.user = Array.from(
-            await this.api.collect(
-                'core\\User',
-                [['id', '=', this.userStatement.userInfo.id]],
+            this.userStatement.userAccess = await this.api.collect(
+                'learn\\UserAccess',
                 [
-                    'name',
-                    'organisation_id',
-                    'validated',
-                    'lastname',
-                    'login',
-                    'language',
-                    'identity_id',
-                    'firstname',
-                    'status',
-                    'username',
+                    ['user_id', '=', this.userStatement.userInfo.id],
+                    ['course_id', '=', courseId],
+                ],
+                ['course_id', 'module_id', 'user_id', 'chapter_index', 'page_index', 'page_count', 'is_complete']
+            );
+
+            this.userStatement.userStatus = await this.api.collect(
+                'learn\\UserStatus',
+                [
+                    ['user_id', '=', this.userStatement.userInfo.id],
+                    ['course_id', '=', courseId],
+                ],
+                [
+                    'code',
+                    'code_alpha',
+                    'course_id',
+                    'master_user_id',
+                    'user_id',
+                    'is_complete',
+                    'module_id',
+                    'chapter_index',
                 ]
-            )
-        )[0] as User;
+            );
+
+            this.userStatement.user = Array.from(
+                await this.api.collect(
+                    'core\\User',
+                    [['id', '=', this.userStatement.userInfo.id]],
+                    [
+                        'name',
+                        'organisation_id',
+                        'validated',
+                        'lastname',
+                        'login',
+                        'language',
+                        'identity_id',
+                        'firstname',
+                        'status',
+                        'username',
+                    ]
+                )
+            )[0] as User;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    public getUserStatusChapterIndex(moduleId: number): number {
+        const chapterStatus: Record<string, any> | undefined = this.userStatement.userStatus.find(
+            (status: Record<string, any>): boolean => status.module_id === moduleId
+        );
+
+        if (!chapterStatus || !chapterStatus.hasOwnProperty('chapter_index')) {
+            return 0;
+        } else {
+            return chapterStatus.chapter_index;
+        }
     }
 
     public async loadCourse(courseId: string): Promise<void> {
         try {
-            if (courseId) {
-                this.course = Array.from(
-                    await this.api.collect(
-                        'learn\\Course',
-                        [['id', '=', courseId]],
-                        ['name', 'title', 'subtitle', 'description']
-                    )
-                )[0] as Course;
-
-                await this.loadModules(courseId);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-
-        console.log('THE COURSE', this.course);
-    }
-
-    public async loadModules(courseId: string): Promise<void> {
-        try {
-            if (courseId) {
-                const modules = (await this.api.collect(
-                    'learn\\Module',
-                    [['course_id', '=', courseId]],
-                    [
-                        'id',
-                        'identifier',
-                        'order',
-                        'title',
-                        'link',
-                        'page_count',
-                        'chapter_count',
-                        'description',
-                        'duration',
-                        'course_id',
-                    ]
-                )) as Module[];
-
-                if (modules && modules.length > 0) {
-                    modules.sort((a, b) => a.order! - b.order!);
-                    this.course.modules = modules;
-                    await this.loadChapters();
-                }
-
-                console.log(modules, this.course);
-            }
+            this.course = await this.api.get('?get=learn_course', { course_id: courseId });
+            this.isLoading = false;
         } catch (error) {
             console.error(error);
         }
     }
 
-    private async loadChapters(): Promise<void> {
-        if (this.course.modules && this.course.modules?.length > 0) {
-            for (const module of this.course.modules) {
-                try {
-                    let lessons: Chapter[] = (await this.api.collect(
-                        'learn\\Chapter',
-                        [['module_id', '=', module.id]],
-                        ['id', 'identifier', 'order', 'title', 'description', 'module_id', 'page_count']
-                    )) as Chapter[];
+    public getCurrentModuleIndex(): number {
+        if (!this.course.modules || this.course.modules.length === 0) return 0;
 
-                    lessons.sort((a, b) => a.order! - b.order!);
+        if (this.userStatement.userStatus.length > 0) {
+            const currentModuleId: number | undefined = this.userStatement.userStatus.sort(
+                (a, b) => b.module_id - a.module_id
+            )[0].module_id;
 
-                    lessons = await this.loadPages(lessons);
-
-                    module.lessons = lessons;
-                } catch (error) {
-                    console.error(error);
-                }
+            if (currentModuleId) {
+                return this.course.modules.findIndex(module => module.id === currentModuleId);
             }
         }
+
+        return 0;
     }
 
-    private async loadPages(lessons: Chapter[]): Promise<Chapter[]> {
-        for (const lesson of lessons) {
-            try {
-                let pages: Page[] = await this.api.collect(
-                    'learn\\Page',
-                    [['chapter_id', '=', lesson.id]],
-                    ['id', 'identifier', 'order', 'next_active', 'next_active_rule', 'chapter_id']
-                );
+    public computeDuration(duration: number): string {
+        const hours: number = Math.floor(duration / 60);
+        const minutes: number = duration % 60;
 
-                pages.sort((a, b) => a.order! - b.order!);
-
-                pages = await this.loadLeaves(pages);
-
-                lesson.pages = pages;
-            } catch (error) {
-                console.error(error);
-            }
+        if (hours === 0) {
+            return `${minutes}min`;
+        } else {
+            return `${hours}h ${minutes}min`;
         }
-
-        return lessons;
-    }
-
-    public async loadLeaves(pages: Page[]): Promise<Page[]> {
-        for (const page of pages) {
-            try {
-                let leaves: Leaf[] = await this.api.collect(
-                    'learn\\Leaf',
-                    [['page_id', '=', page.id]],
-                    ['id', 'identifier', 'order', 'background_image', 'page_id']
-                );
-
-                // @ts-ignore
-                leaves.sort((a, b) => a.order! - b.order!);
-
-                leaves = await this.loadGroups(leaves);
-
-                page.leaves = leaves;
-            } catch (error) {
-                console.error(error);
-            }
-        }
-
-        return pages;
-    }
-
-    public async loadGroups(leaves: Leaf[]): Promise<Leaf[]> {
-        for (const leaf of leaves) {
-            try {
-                let groups: Group[] = await this.api.collect(
-                    'learn\\Group',
-                    [['leaf_id', '=', leaf.id]],
-                    [
-                        'id',
-                        'identifier',
-                        'order',
-                        'direction',
-                        'row_span',
-                        'visible',
-                        'visibility_rule',
-                        'fixed',
-                        'leaf_id',
-                    ]
-                );
-
-                // @ts-ignore
-                groups.sort((a, b) => a.order! - b.order!);
-
-                groups = await this.loadWidgets(groups);
-
-                leaf.groups = groups;
-            } catch (error) {
-                console.error(error);
-            }
-        }
-
-        return leaves;
-    }
-
-    private async loadWidgets(groups: Group[]): Promise<Group[]> {
-        for (const group of groups) {
-            try {
-                let widgets: Widget[] = await this.api.collect(
-                    'learn\\Widget',
-                    [['group_id', '=', group.id]],
-                    [
-                        'id',
-                        'identifier',
-                        'order',
-                        'content',
-                        'type',
-                        'section_id',
-                        'image_url',
-                        'video_url',
-                        'sound_url',
-                        'has_separator_left',
-                        'has_separator_right',
-                        'align',
-                        'on_click',
-                    ]
-                );
-
-                // @ts-ignore
-                widgets.sort((a, b) => a.order! - b.order!);
-
-                group.widgets = widgets;
-            } catch (error) {
-                console.error(error);
-            }
-        }
-
-        return groups;
     }
 }

@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-// @ts-ignore
-import { ContextService } from 'sb-shared-lib';
 
 @Component({
     // eslint-disable-next-line @angular-eslint/component-selector
@@ -8,4 +6,14 @@ import { ContextService } from 'sb-shared-lib';
     templateUrl: 'app.component.html',
     styleUrls: ['app.component.scss'],
 })
-export class AppComponent {}
+export class AppComponent implements OnInit {
+    public device: 'small' | 'large';
+
+    public ngOnInit(): void {
+        if (window.innerWidth < 1024) {
+            this.device = 'small';
+        } else {
+            this.device = 'large';
+        }
+    }
+}

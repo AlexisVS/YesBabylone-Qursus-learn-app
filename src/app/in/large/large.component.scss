@@ -33,6 +33,14 @@
     width: 100%;
     min-height: calc(100vh - 109px);
 
+    .spinner {
+        position: absolute;
+        z-index: 1;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
     .side-bar {
         position: absolute;
         z-index: 2;
@@ -110,8 +118,18 @@
             }
         }
 
+        .no-content {
+            display: block;
+
+            width: 100%;
+            margin-top: 50px;
+
+            color: rgb(0 0 0 / 54%);
+            text-align: center;
+        }
+
         .drawer {
-            $drawer-width: 400px;
+            $drawer-width: 500px;
 
             @include scrollbar-style;
 
@@ -147,9 +165,14 @@
                 transition: right 350ms;
             }
 
+            mat-expansion-panel-header::ng-deep {
+                height: 60px;
+            }
+
             mat-expansion-panel::ng-deep {
                 .mat-content {
                     justify-content: space-between;
+
 
                     .mat-expansion-panel-header-description {
                         flex-grow: initial;
@@ -174,7 +197,7 @@
                 background-color: var(--mdc-theme-surface);
                 transition: background-color 350ms;
 
-                &.selected {
+                &.current-progression {
                     background-color: color.adjust(#3f51b5, $alpha: -0.95);
 
                     &::before {
@@ -191,6 +214,17 @@
                         height: 100%;
 
                         background-color: var(--mdc-theme-primary);
+                    }
+                }
+
+                .panel-description {
+                    display: flex;
+                    align-items: flex-start;
+                    flex-direction: column;
+                    gap: 4px;
+
+                    * {
+                        white-space: nowrap;
                     }
                 }
 

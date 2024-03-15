@@ -6,16 +6,8 @@ import { SmallComponent } from './in/small/small.component';
 
 const routes: Route[] = [
     {
-        path: '',
+        path: ':slug',
         component: AppComponent,
-    },
-    {
-        path: 'large/:courseId',
-        component: LargeComponent,
-    },
-    {
-        path: 'small/:courseId',
-        component: SmallComponent,
     },
 ];
 

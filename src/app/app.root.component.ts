@@ -1,9 +1,7 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 // @ts-ignore
 import { AuthService, ApiService } from 'sb-shared-lib';
-
-
 
 @Component({
     selector: 'app-root',
@@ -11,9 +9,8 @@ import { AuthService, ApiService } from 'sb-shared-lib';
     styleUrls: ['./app.root.component.scss'],
 })
 // , OnDestroy
-export class AppRootComponent implements OnInit, AfterViewInit {
+export class AppRootComponent implements OnInit {
     public userInfo: any;
-
 
     constructor(
         private router: Router,
@@ -31,13 +28,6 @@ export class AppRootComponent implements OnInit, AfterViewInit {
                 window.location.href = 'http://equal.local/auth';
             }
             console.error('Error in appRoot: \n', err);
-            return;
         }
-    }
-
-    public ngAfterViewInit(): void {
-        window.innerWidth < 1024
-            ? this.router.navigate(['small', '1'], { relativeTo: this.router.routerState.root })
-            : this.router.navigate(['large', '1'], { relativeTo: this.router.routerState.root });
     }
 }

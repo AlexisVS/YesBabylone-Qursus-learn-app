@@ -1,51 +1,50 @@
 <div class="top-bar">
     <div class="brand">
-        <img src="https://placehold.co/150x45?text=Brand" alt="">
+        <img [src]="appInfo.backend_url + appInfo.app_logo_url" alt="" />
     </div>
 
-    <div class="informations">
+    <div class="informations" [style.align-items]="!currentLesson || !currentModule ? 'flex-start' : undefined">
         <div class="course">
-            <div class="font-size-3 name">YesBabylon cours #1</div>
+            <div class="font-size-3 name">{{ course.title }}</div>
 
-            <div class="breadcrumb">
+            <div class="breadcrumb" *ngIf="currentModule && currentLesson">
+                <!-- Module -->
                 <div class="part">
-                    <span class="font-size-1 label">Qu'est ce que Symbiose</span>
-                    <span class="font-size--2 progress">1 / 10 - 20min</span>
+                    <span class="font-size-0 label">{{ currentModule.title }}</span>
+                    <span class="font-size--3 progress">{{ currentModuleProgress }}</span>
                 </div>
 
+                <!-- Chapter -->
                 <div class="part">
-                    <span class="font-size-1 label">Introduction</span>
-                    <span class="font-size--2 progress">1 / 4 - 5min - 3p</span>
+                    <span class="font-size-0 label">{{ currentLesson.title }}</span>
+                    <span class="font-size--3 progress">{{ currentLessonProgress }}</span>
                 </div>
             </div>
         </div>
 
-        <div class="progression">
+        <div class="progression" *ngIf="currentTotalCourseProgress">
             <div class="chart">
-                <mat-progress-spinner
-                    [diameter]="75"
-                    class="background"
-                    [mode]="'determinate'"
-                    [value]="100">
+                <mat-progress-spinner [diameter]="75" class="background" [mode]="'determinate'" [value]="100">
                 </mat-progress-spinner>
                 <mat-progress-spinner
                     [diameter]="75"
-                    class="valuable"
                     [color]="'primary'"
                     [mode]="'determinate'"
-                    [value]="50">
+                    [value]="currentTotalCourseProgress.currentPourcentage">
                 </mat-progress-spinner>
-                <span class="font-size-2 percentage">50%</span>
+                <span class="font-size-2 percentage">{{ currentTotalCourseProgress.currentPourcentage + '%' }}</span>
             </div>
 
             <div class="text">
-                <span class="font-size-1 title">Progression</span>
-                <span class="font-size--1 details">10min / 3h 20min</span>
+                <span class="font-size-0 title">Progression</span>
+                <span class="font-size--1 details">
+                    {{ currentTotalCourseProgress.current + ' / ' + currentTotalCourseProgress.total }}
+                </span>
             </div>
         </div>
     </div>
 
     <div class="profile">
-        <img src="https://placehold.co/50x50/?text=A" alt="">
+        <img src="https://placehold.co/50x50/?text=A" alt="" />
     </div>
 </div>
