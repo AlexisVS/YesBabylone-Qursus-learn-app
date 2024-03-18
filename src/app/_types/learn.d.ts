@@ -1,4 +1,5 @@
 import * as Equal from './equal';
+import { User } from './equal';
 
 export type Course = {
     id: number;
@@ -7,9 +8,9 @@ export type Course = {
     subtitle: string;
     description: string;
     creator?: number;
-    modules?: Module[];
+    modules: Module[];
     modified?: string;
-    langs_ids?: number[];
+    langs_ids?: Record<string, any>[];
     state?: Equal.ModelState;
 };
 
@@ -22,12 +23,11 @@ export type Module = {
     duration: number;
     modified: string;
     state: Equal.ModelState;
-    lessons?: Chapter[];
     creator?: number;
-    chapters?: Chapter[];
-    order?: number;
+    chapters: Chapter[];
+    order: number;
     chapter_count?: number;
-    course_id?: number | Course;
+    course_id: number | Course;
     link?: string;
 };
 
@@ -38,11 +38,12 @@ export type Chapter = {
     title: string;
     duration: number;
     description: string;
-    module_id?: number;
+    module_id: number;
     state: Equal.ModelState;
+    page_count: number;
     creator?: number;
-    order?: number;
-    pages?: String[] | Page[];
+    order: number;
+    pages: Page[];
 };
 
 export type Page = {
@@ -52,6 +53,7 @@ export type Page = {
     next_active: string;
     order: number;
     leaves: Leaf[];
+    chapter_id: number;
 };
 
 export type Leaf = {
@@ -122,3 +124,20 @@ export type WidgetType =
     | 'selector_section'
     | 'selector_section_wide'
     | 'selector_popup';
+
+export type UserStatus = {
+    course_id: number;
+    module_id: number;
+    user_id: number;
+    chapter_index: number;
+    page_index: number;
+    page_count: number;
+    is_complete: boolean;
+};
+
+export type UserStatement = {
+    user: User;
+    userAccess: any;
+    userInfo: any;
+    userStatus: UserStatus[];
+};

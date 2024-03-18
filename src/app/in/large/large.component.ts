@@ -1,19 +1,12 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { Course } from '../../_types/learn';
+import { Course, UserStatement } from '../../_types/learn';
 // @ts-ignore
 import { ApiService } from 'sb-shared-lib';
 import { ActivatedRoute } from '@angular/router';
-import { User } from '../../_types/equal';
+import { LearnService } from '../../_services/Learn.service';
 
 type DrawerState = 'inactive' | 'active' | 'pinned';
-
-export type UserStatement = {
-    user: User;
-    userAccess: any;
-    userInfo: any;
-    userStatus: any[];
-};
 
 @Component({
     selector: 'app-large',
@@ -41,7 +34,8 @@ export class LargeComponent implements AfterViewInit {
     constructor(
         private api: ApiService,
         private route: ActivatedRoute,
-        private elementRef: ElementRef
+        private elementRef: ElementRef,
+        private learnService: LearnService
     ) {
         window.addEventListener('click', (event: MouseEvent): void => {
             if (
@@ -54,6 +48,35 @@ export class LargeComponent implements AfterViewInit {
                 }
             }
         });
+    }
+
+    public ngAfterViewInit(): void {
+        this.load();
+    }
+
+    public async load(): Promise<void> {
+        this.environnementInfo = await this.api.get('appinfo');
+        this.appInfo = await this.api.get('assets/env/config.json');
+
+        const courseTitleSlug: string | null = this.route.snapshot.paramMap.get('slug');
+
+        if (courseTitleSlug) {
+            this.setDocumentTitle(courseTitleSlug);
+            const courseId: string | null = await this.learnService.getCourseIdFromSlug(courseTitleSlug);
+
+            if (courseId) {
+                this.learnService.setCourseId(courseId);
+                this.userStatement = await this.learnService.getUserStatement();
+
+                this.course = await this.learnService.getCourse();
+                this.isLoading = false;
+
+                if (this.course) {
+                    this.currentModuleProgressionIndex = this.getCurrentModuleIndex();
+                    this.hasAccessToCourse = true;
+                }
+            }
+        }
     }
 
     public onSideBarButtonClick(): void {
@@ -81,129 +104,38 @@ export class LargeComponent implements AfterViewInit {
         }
     }
 
-    // public ngOnInit(): void {
-    // }
-
-    public ngAfterViewInit(): void {
-        this.load();
-    }
-
-    public async load(): Promise<void> {
-        this.environnementInfo = await this.api.get('appinfo');
-
-        this.appInfo = await this.api.get('assets/env/config.json');
-
-        const courseTitleSlug: string | null = this.route.snapshot.paramMap.get('slug');
-        const courseId: string = (
-            await this.api.collect('learn\\Course', [['title', '=', courseTitleSlug]], ['id'])
-        )[0].id.toString();
-
-        if (courseId && courseTitleSlug) {
-            const courseTitleHyphenated: string = courseTitleSlug.replace(/ /g, '-');
-
-            document.title = `Learn - ${courseTitleSlug}`;
-            window.history.replaceState({}, '', `/${courseTitleHyphenated}`);
-
-            await this.loadUserStatement(courseId);
-            await this.loadCourse(courseId);
-
-            if (this.course) {
-                this.currentModuleProgressionIndex = this.getCurrentModuleIndex();
-                this.hasAccessToCourse = true;
-            }
+    public setDocumentTitle(title: string): void {
+        // for reloading purpose
+        if (title?.includes('-')) {
+            title = title.replace(/-/g, ' ');
         }
-        this.isLoading = false;
-    }
+        const courseTitleHyphenated: string = title.replace(/ /g, '-');
 
-    public async loadUserStatement(courseId: string): Promise<void> {
-        try {
-            this.userStatement.userInfo = await this.api.get('userinfo');
-
-            this.userStatement.userAccess = await this.api.collect(
-                'learn\\UserAccess',
-                [
-                    ['user_id', '=', this.userStatement.userInfo.id],
-                    ['course_id', '=', courseId],
-                ],
-                ['course_id', 'module_id', 'user_id', 'chapter_index', 'page_index', 'page_count', 'is_complete']
-            );
-
-            this.userStatement.userStatus = await this.api.collect(
-                'learn\\UserStatus',
-                [
-                    ['user_id', '=', this.userStatement.userInfo.id],
-                    ['course_id', '=', courseId],
-                ],
-                [
-                    'code',
-                    'code_alpha',
-                    'course_id',
-                    'master_user_id',
-                    'user_id',
-                    'is_complete',
-                    'module_id',
-                    'chapter_index',
-                ]
-            );
-
-            this.userStatement.user = Array.from(
-                await this.api.collect(
-                    'core\\User',
-                    [['id', '=', this.userStatement.userInfo.id]],
-                    [
-                        'name',
-                        'organisation_id',
-                        'validated',
-                        'lastname',
-                        'login',
-                        'language',
-                        'identity_id',
-                        'firstname',
-                        'status',
-                        'username',
-                    ]
-                )
-            )[0] as User;
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    public getUserStatusChapterIndex(moduleId: number): number {
-        const chapterStatus: Record<string, any> | undefined = this.userStatement.userStatus.find(
-            (status: Record<string, any>): boolean => status.module_id === moduleId
-        );
-
-        if (!chapterStatus || !chapterStatus.hasOwnProperty('chapter_index')) {
-            return 0;
-        } else {
-            return chapterStatus.chapter_index;
-        }
-    }
-
-    public async loadCourse(courseId: string): Promise<void> {
-        try {
-            this.course = await this.api.get('?get=learn_course', { course_id: courseId });
-            this.isLoading = false;
-        } catch (error) {
-            console.error(error);
-        }
+        document.title = `Learn - ${title}`;
+        window.history.replaceState({}, '', `/${courseTitleHyphenated}`);
     }
 
     public getCurrentModuleIndex(): number {
         if (!this.course.modules || this.course.modules.length === 0) return 0;
 
         if (this.userStatement.userStatus.length > 0) {
-            const currentModuleId: number | undefined = this.userStatement.userStatus.sort(
-                (a, b) => b.module_id - a.module_id
-            )[0].module_id;
+            const currentModuleId: number = this.userStatement.userStatus.sort((a, b) => b.module_id - a.module_id)[0]
+                .module_id;
 
-            if (currentModuleId) {
-                return this.course.modules.findIndex(module => module.id === currentModuleId);
-            }
+            return this.course.modules.findIndex(module => module.id === currentModuleId);
         }
 
         return 0;
+    }
+
+    public getUserStatusChapterIndex(moduleId: number): number {
+        const chapterStatus = this.userStatement.userStatus.find(userStatus => userStatus.module_id === moduleId);
+
+        if (chapterStatus) {
+            return chapterStatus.chapter_index;
+        } else {
+            return 0;
+        }
     }
 
     public computeDuration(duration: number): string {
@@ -215,5 +147,9 @@ export class LargeComponent implements AfterViewInit {
         } else {
             return `${hours}h ${minutes}min`;
         }
+    }
+
+    public async onClickChapter(moduleId: number): Promise<void> {
+        this.course = await this.learnService.loadCourseModule(moduleId);
     }
 }

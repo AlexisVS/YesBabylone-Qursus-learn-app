@@ -56,7 +56,11 @@
 
                         <mat-selection-list [multiple]="false" *ngIf="module.chapters && module.chapters.length > 0">
                             <ng-container *ngFor="let chapter of module.chapters">
-                                <mat-list-option *ngIf="chapter" [value]="chapter" class="item">
+                                <mat-list-option
+                                    *ngIf="chapter"
+                                    [value]="chapter"
+                                    class="item"
+                                    (click)="onClickChapter(module.id)">
                                     <div class="content">
                                         <div class="row">
                                             <span class="font-size--3">{{ chapter.title }}</span>
