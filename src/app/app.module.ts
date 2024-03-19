@@ -18,9 +18,13 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SmallComponent } from './in/small/small.component';
+import { ContentComponent } from './in/large/tabs/content/content.component';
+import { PresentationComponent } from './in/large/tabs/presentation/presentation.component';
+import { QAndAComponent } from './in/large/tabs/q-and-a/q-and-a.component';
+import { ReviewsComponent } from './in/large/tabs/reviews/reviews.component';
 
 @NgModule({
-    declarations: [AppRootComponent, AppComponent, TopBarComponent, LargeComponent, SmallComponent],
+    declarations: [AppRootComponent, AppComponent, TopBarComponent, LargeComponent, SmallComponent, ContentComponent, PresentationComponent, QAndAComponent, ReviewsComponent],
     imports: [
         AppRoutingModule,
         BrowserModule,

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiService } from 'sb-shared-lib';
 import { User } from '../_types/equal';
 import { Course, UserStatement, UserStatus } from '../_types/learn';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Injectable({
     providedIn: 'root',
@@ -14,18 +15,54 @@ export class LearnService {
 
     public courseId: string;
     public course: Course;
+    private moduleIdLoaded: Set<number> = new Set<number>();
 
-    constructor(private api: ApiService) {
-        this.getUserInfo();
+    public currentModuleProgressionIndex: number = 0;
+    public currentChapterProgressionIndex: number = 0;
+
+    constructor(
+        private api: ApiService,
+        private router: Router,
+    ) {
     }
 
-    public setCourseId(courseId: string): this {
-        this.courseId = courseId;
+    public async loadRessources(): Promise<void> {
+        await this.setCourseId();
 
-        return this;
+        if (this.courseId) {
+            await this.getUserInfos();
+            await this.loadCourse();
+            this.setCurrentModuleAndChapterIndex();
+        }
     }
 
-    public async getUserInfo(): Promise<void> {
+    private async setCourseId(): Promise<void> {
+        const slug: string = this.router.url.replace(/%20/g, ' ').slice(1);
+
+        const courseId: string | null = await this.getCourseIdFromSlug(slug);
+
+        if (courseId) {
+            this.courseId = courseId;
+        } else {
+            throw new Error('No course slug found');
+        }
+    }
+
+    private async getCourseIdFromSlug(courseTitleSlug: string): Promise<string | null> {
+        courseTitleSlug = courseTitleSlug.replace(/-/g, ' ');
+
+        try {
+            return (
+                await this.api.collect('learn\\Course', [['title', '=', courseTitleSlug]], ['id'])
+            )[0].id.toString();
+        } catch (error) {
+            console.error(error);
+        }
+
+        return null;
+    }
+
+    private async getUserInfos(): Promise<void> {
         try {
             this.userInfo = await this.api.get('userinfo');
 
@@ -44,18 +81,12 @@ export class LearnService {
                         'firstname',
                         'status',
                         'username',
-                    ]
+                    ],
                 )
             )[0] as User;
-        } catch (error) {
-            console.error(error);
-        }
-    }
 
-    public async getUserStatement(): Promise<UserStatement> {
-        if (!this.courseId) throw new Error('Course ID not set');
-        try {
-            const userAccess = (
+
+            this.userAccess = (
                 await this.api.collect(
                     'learn\\UserAccess',
                     [
@@ -63,11 +94,11 @@ export class LearnService {
                         ['course_id', '=', this.courseId],
                     ],
                     ['course_id', 'module_id', 'user_id', 'chapter_index', 'page_index', 'page_count', 'is_complete'],
-                    'module_id'
+                    'module_id',
                 )
             )[0];
 
-            const userStatus: UserStatus[] = await this.api.collect(
+            this.userStatus = await this.api.collect(
                 'learn\\UserStatus',
                 [
                     ['user_id', '=', this.userInfo.id],
@@ -84,24 +115,16 @@ export class LearnService {
                     'chapter_index',
                 ],
                 'module_id',
-                'desc'
+                'desc',
             );
-
-            this.userAccess = userAccess;
-            this.userStatus = userStatus;
         } catch (error) {
             console.error(error);
         }
-        return {
-            user: this.user,
-            userInfo: this.userInfo,
-            userAccess: this.userAccess,
-            userStatus: this.userStatus,
-        } as UserStatement;
     }
 
-    public async getCourse(): Promise<Course> {
+    private async loadCourse(): Promise<Course> {
         if (!this.courseId) throw new Error('Course ID not set');
+
         try {
             this.course = await this.api.get('?get=learn_course', { course_id: this.courseId });
         } catch (error) {
@@ -111,30 +134,50 @@ export class LearnService {
         return this.course;
     }
 
-    public async getCourseIdFromSlug(courseTitleSlug: string): Promise<string | null> {
-        courseTitleSlug = courseTitleSlug.replace(/-/g, ' ');
+    private setCurrentModuleAndChapterIndex(): void {
+        let moduleIndex: number = 0;
+        let chapterIndex: number = 0;
 
-        try {
-            return (
-                await this.api.collect('learn\\Course', [['title', '=', courseTitleSlug]], ['id'])
-            )[0].id.toString();
-        } catch (error) {
-            console.error(error);
+        if (this.userStatus.length > 0 && this.course.modules && this.course.modules.length > 0) {
+            const currentStatus: UserStatus = this.userStatus.sort((a, b) => b.module_id - a.module_id)[0];
+            const currentModuleId: number = currentStatus.module_id;
+            chapterIndex = currentStatus.chapter_index;
+
+            moduleIndex = this.course.modules.findIndex(module => module.id === currentModuleId);
+
+            if (moduleIndex === -1) {
+                moduleIndex = 0;
+            }
         }
 
-        return null;
+        this.currentModuleProgressionIndex = moduleIndex;
+        this.currentChapterProgressionIndex = chapterIndex;
+    }
+
+    public getUserStatement(): UserStatement {
+        return {
+            user: this.user,
+            userInfo: this.userInfo,
+            userAccess: this.userAccess,
+            userStatus: this.userStatus,
+        } as UserStatement;
     }
 
     public async loadCourseModule(moduleId: number): Promise<Course> {
-        try {
-            const module = await this.api.get('?get=learn_module', { id: moduleId });
+        if (!this.moduleIdLoaded.has(moduleId)) {
+            try {
+                const module = await this.api.get('?get=learn_module', { id: moduleId });
 
-            const courseModuleIndex = this.course.modules.findIndex(courseModule => courseModule.id === module.id);
+                const courseModuleIndex: number = this.course.modules.findIndex(courseModule => courseModule.id === module.id);
 
-            this.course.modules[courseModuleIndex] = module;
-        } catch (error) {
-            console.error(error);
+                this.course.modules[courseModuleIndex] = module;
+
+                this.moduleIdLoaded.add(moduleId);
+            } catch (error) {
+                console.error(error);
+            }
         }
+
         return this.course;
     }
 }
