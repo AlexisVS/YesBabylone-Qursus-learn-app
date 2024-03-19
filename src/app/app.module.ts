@@ -24,7 +24,17 @@ import { QAndAComponent } from './in/large/tabs/q-and-a/q-and-a.component';
 import { ReviewsComponent } from './in/large/tabs/reviews/reviews.component';
 
 @NgModule({
-    declarations: [AppRootComponent, AppComponent, TopBarComponent, LargeComponent, SmallComponent, ContentComponent, PresentationComponent, QAndAComponent, ReviewsComponent],
+    declarations: [
+        AppRootComponent,
+        AppComponent,
+        TopBarComponent,
+        LargeComponent,
+        SmallComponent,
+        ContentComponent,
+        PresentationComponent,
+        QAndAComponent,
+        ReviewsComponent,
+    ],
     imports: [
         AppRoutingModule,
         BrowserModule,

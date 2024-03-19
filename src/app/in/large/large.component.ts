@@ -1,8 +1,6 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { Course, UserStatement } from '../../_types/learn';
-// @ts-ignore
-import { LearnService } from '../../_services/Learn.service';
 
 type DrawerState = 'inactive' | 'active' | 'pinned';
 
@@ -26,11 +24,9 @@ export class LargeComponent {
 
     @Output() public moduleToLoad: EventEmitter<number> = new EventEmitter<number>();
 
-
     public drawerState: DrawerState = 'inactive';
     public menuIcon: string = 'menu';
     public selectedModuleIndex: number = 0;
-
 
     constructor() {
         window.addEventListener('click', (event: MouseEvent): void => {

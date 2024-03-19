@@ -219,9 +219,9 @@
 
                 .panel-description {
                     display: flex;
-                    align-items: flex-start;
                     flex-direction: column;
                     gap: 4px;
+                    align-items: flex-start;
 
                     * {
                         white-space: nowrap;
@@ -246,7 +246,7 @@
                         overflow: hidden;
                         background: linear-gradient(
                                 60deg,
-                                rgba(63, 81, 181, 0.1) 63%,
+                                rgb(63 81 181 / 10%) 63%,
                                 transparent 95%
                         )
                     }
@@ -280,7 +280,7 @@
                             .assets {
                                 display: flex;
                                 flex-direction: row;
-                                gap: 0px;
+                                gap: 0;
                                 align-items: center;
                                 justify-content: space-evenly;
 

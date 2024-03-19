@@ -22,9 +22,8 @@ export class LearnService {
 
     constructor(
         private api: ApiService,
-        private router: Router,
-    ) {
-    }
+        private router: Router
+    ) {}
 
     public async loadRessources(): Promise<void> {
         await this.setCourseId();
@@ -81,10 +80,9 @@ export class LearnService {
                         'firstname',
                         'status',
                         'username',
-                    ],
+                    ]
                 )
             )[0] as User;
-
 
             this.userAccess = (
                 await this.api.collect(
@@ -94,7 +92,7 @@ export class LearnService {
                         ['course_id', '=', this.courseId],
                     ],
                     ['course_id', 'module_id', 'user_id', 'chapter_index', 'page_index', 'page_count', 'is_complete'],
-                    'module_id',
+                    'module_id'
                 )
             )[0];
 
@@ -115,7 +113,7 @@ export class LearnService {
                     'chapter_index',
                 ],
                 'module_id',
-                'desc',
+                'desc'
             );
         } catch (error) {
             console.error(error);
@@ -168,7 +166,9 @@ export class LearnService {
             try {
                 const module = await this.api.get('?get=learn_module', { id: moduleId });
 
-                const courseModuleIndex: number = this.course.modules.findIndex(courseModule => courseModule.id === module.id);
+                const courseModuleIndex: number = this.course.modules.findIndex(
+                    courseModule => courseModule.id === module.id
+                );
 
                 this.course.modules[courseModuleIndex] = module;
 

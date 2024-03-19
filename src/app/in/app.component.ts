@@ -27,9 +27,8 @@ export class AppComponent implements OnInit {
     constructor(
         private api: ApiService,
         private route: ActivatedRoute,
-        private learnService: LearnService,
-    ) {
-    }
+        private learnService: LearnService
+    ) {}
 
     public ngOnInit(): void {
         if (window.innerWidth < 1024) {
@@ -84,5 +83,4 @@ export class AppComponent implements OnInit {
         //     lesson.starred = true;
         // }
     }
-
 }
