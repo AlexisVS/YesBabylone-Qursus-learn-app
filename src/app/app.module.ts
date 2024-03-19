@@ -63,6 +63,7 @@ import { ReviewsComponent } from './in/large/tabs/reviews/reviews.component';
             deps: [MAT_DATE_LOCALE, Platform],
         },
     ],
-    bootstrap: [AppRootComponent, AppComponent],
+    bootstrap: [AppRootComponent],
 })
-export class AppModule {}
+export class AppModule {
+}
